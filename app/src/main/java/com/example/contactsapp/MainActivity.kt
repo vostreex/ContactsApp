@@ -1,0 +1,82 @@
+package com.example.contactsapp
+
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.content.ContextCompat
+import com.example.contactsapp.presentation.navigation.AppNavHost
+import com.example.contactsapp.ui.theme.ContactsAppTheme
+import dagger.hilt.android.AndroidEntryPoint
+
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            ContactsAppTheme {
+                var contactsPermissionGranted by remember { mutableStateOf(false) }
+
+               //Разрешения
+                val launcher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.RequestMultiplePermissions()
+                ) { grants ->
+                    contactsPermissionGranted = grants.all { it.value }
+                }
+
+                LaunchedEffect(Unit) {
+                    val requiredPermissions = arrayOf(
+                        Manifest.permission.READ_CONTACTS,
+                        Manifest.permission.WRITE_CONTACTS,
+                        Manifest.permission.CALL_PHONE
+                    )
+
+                    val granted = requiredPermissions.all {
+                        ContextCompat.checkSelfPermission(
+                            this@MainActivity,
+                            it
+                        ) == PackageManager.PERMISSION_GRANTED
+                    }
+                    if (granted) {
+                        contactsPermissionGranted = true
+                    } else {
+                        launcher.launch(requiredPermissions)
+                    }
+                }
+
+                // Отображение UI в зависимости от статуса разрешений
+                if (contactsPermissionGranted) {
+                    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                        AppNavHost(innerPadding)
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier.fillMaxSize()
+                    ){
+                        Text("Требуются разрешения для работы приложения",
+                            modifier = Modifier.align(Alignment.Center))
+                    }
+                }
+            }
+        }
+    }
+}
