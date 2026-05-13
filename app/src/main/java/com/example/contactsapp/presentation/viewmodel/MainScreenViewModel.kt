@@ -3,7 +3,6 @@ package com.example.contactsapp.presentation.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.contactsapp.domain.model.Contact
 import com.example.contactsapp.domain.usecase.GetContactsUseCase
 import com.example.contactsapp.presentation.Screens.MainScreenUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
