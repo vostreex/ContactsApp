@@ -68,4 +68,14 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     implementation("io.coil-kt:coil-compose:2.4.0")
+
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:<version>")
+    testImplementation("io.mockk:mockk:<version>")
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.arch.core.testing)
+    testImplementation(libs.mockk)
+    testImplementation(libs.turbine)
+    testImplementation(libs.truth)
 }

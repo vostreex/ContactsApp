@@ -13,21 +13,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.contactsapp.data.service.DuplicateContactResult
 import com.example.contactsapp.data.service.DuplicateContactServiceClient
 import com.example.contactsapp.makeCall
 import com.example.contactsapp.presentation.items.ContactItem
-import com.example.contactsapp.presentation.viewmodel.MainScreenViewModel
 import androidx.compose.material3.*
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -35,22 +30,12 @@ import androidx.compose.runtime.setValue
 
 @Composable
 fun MainScreen(
-    viewModel: MainScreenViewModel,
+    onConfirmDeleteDuplicate:() -> Unit,
+    uiState: MainScreenUiState,
 ){
     val context = LocalContext.current
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val client = remember(context) { DuplicateContactServiceClient(context) }
-
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        viewModel.loadContacts(context)
-    }
-
-    DisposableEffect(Unit) {
-        client.bindService()
-        onDispose { client.unBindService() }
-    }
     Box(
         modifier = Modifier.fillMaxSize()
     ){
@@ -115,16 +100,7 @@ fun MainScreen(
                 Text("Да,удалить",
                     modifier = Modifier
                         .clickable{
-                        client.removeDuplicateContacts {
-                            when(it){
-                                DuplicateContactResult.SUCCESS -> {
-                                    viewModel.loadContacts(context)
-                                    Toast.makeText(context,"Дубликаты успешно удалены", Toast.LENGTH_SHORT).show()
-                                }
-                                DuplicateContactResult.DUPLICATE_NOT_FOUND -> Toast.makeText(context,"Дубликаты не найдены", Toast.LENGTH_SHORT).show()
-                                DuplicateContactResult.ERROR -> Toast.makeText(context,"Ошибка при удалении", Toast.LENGTH_SHORT).show()
-                            }
-                        }
+                        onConfirmDeleteDuplicate()
                         showDeleteDialog = false
                     }
                 )
